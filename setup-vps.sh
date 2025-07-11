@@ -273,7 +273,7 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ] && [ "$WORDPRESS_BACKUP_URL" != "https://exa
         
         # Restore backup using WP-CLI
         echo -e "\n🔄 Restoring WordPress backup..."
-        if docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
+        if echo "y" | docker exec -it wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
             echo "✅ WordPress backup restored successfully!"
             
             # Wait for restore to complete

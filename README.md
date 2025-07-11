@@ -57,6 +57,68 @@ your-project/
     └── deploy-nextjs.yml     # CI/CD pipeline
 ```
 
+## 🔑 SSH Keys Management
+
+### Quick SSH Keys Setup
+
+Nếu bạn chưa có SSH keys, sử dụng một trong các cách sau:
+
+#### Cách 1: Tự động tạo (Recommended)
+
+```bash
+chmod +x get-ssh-keys.sh
+./get-ssh-keys.sh --generate
+```
+
+#### Cách 2: Menu tương tác
+
+```bash
+chmod +x ssh-keys-manager.sh
+./ssh-keys-manager.sh
+```
+
+#### Cách 3: Script riêng biệt
+
+```bash
+chmod +x generate-ssh-keys.sh
+./generate-ssh-keys.sh
+```
+
+### SSH Keys Scripts
+
+-   `get-ssh-keys.sh` - Kiểm tra và tạo SSH keys
+-   `ssh-keys-manager.sh` - Menu quản lý SSH keys tương tác
+-   `generate-ssh-keys.sh` - Tạo SSH keys tự động
+-   `backup-ssh-keys.sh` - Backup SSH keys
+-   `setup-ssh-server.sh` - Cài đặt SSH server và authorized_keys
+-   `check-ssh-keys.sh` - Kiểm tra tổng quan SSH keys
+-   `test-ssh-connection.sh` - Test SSH connection
+
+### Usage Examples
+
+```bash
+# Kiểm tra trạng thái SSH keys
+./get-ssh-keys.sh
+
+# Tạo SSH keys nếu chưa có
+./get-ssh-keys.sh --generate
+
+# Quản lý SSH keys với menu
+./ssh-keys-manager.sh
+
+# Backup SSH keys
+./backup-ssh-keys.sh
+
+# Setup SSH server (on target server)
+./setup-ssh-server.sh 'your-public-key-here'
+
+# Comprehensive SSH keys check
+./check-ssh-keys.sh
+
+# Test SSH connection
+./test-ssh-connection.sh user@server.com
+```
+
 ## 🔧 Configuration
 
 ### Environment Variables (.env)

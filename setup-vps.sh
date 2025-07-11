@@ -328,26 +328,50 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ] && [ "$WORDPRESS_BACKUP_URL" != "https://exa
     
     # Restore backup using WP-CLI
     echo -e "\n🔄 Restoring WordPress backup..."
-                    if echo "y" | docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
-                    echo "✅ WordPress backup restored successfully!"
-                    
-                    # Wait for restore to complete
-                    sleep 10
-                    
-                    # Fix permissions after restore
-                    echo "🔧 Fixing permissions after restore..."
-                    docker exec wordpress chown -R www-data:www-data /var/www/html
-                    docker exec wordpress chmod -R 755 /var/www/html
-                    docker exec wordpress chmod -R 777 /var/www/html/wp-content
-                    
-                    # Verify WordPress is still functional after restore
-                    if docker exec wordpress wp core is-installed --allow-root 2>/dev/null; then
-                        echo "✅ WordPress verification after restore: OK"
-                    else
-                        echo "⚠️  WordPress verification after restore: Failed"
-                    fi
+    
+    # Check if AI1WM plugin is active
+    if ! docker exec wordpress wp plugin is-active all-in-one-wp-migration --allow-root 2>/dev/null; then
+        echo "❌ AI1WM plugin is not active. Activating..."
+        docker exec wordpress wp plugin activate all-in-one-wp-migration --allow-root
+    fi
+    
+    # Check if AI1WM Unlimited Extension is active
+    if ! docker exec wordpress wp plugin is-active all-in-one-wp-migration-unlimited-extension --allow-root 2>/dev/null; then
+        echo "❌ AI1WM Unlimited Extension is not active. Activating..."
+        docker exec wordpress wp plugin activate all-in-one-wp-migration-unlimited-extension --allow-root
+    fi
+    
+    # List backup files for debugging
+    echo "📋 Available backup files:"
+    docker exec wordpress ls -la /var/www/html/wp-content/ai1wm-backups/
+    
+    # Try restore with better error handling
+    echo "🔄 Attempting restore..."
+    if echo "y" | docker exec -i wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
+        echo "✅ WordPress backup restored successfully!"
+        
+        # Wait for restore to complete
+        sleep 10
+        
+        # Fix permissions after restore
+        echo "🔧 Fixing permissions after restore..."
+        docker exec wordpress chown -R www-data:www-data /var/www/html
+        docker exec wordpress chmod -R 755 /var/www/html
+        docker exec wordpress chmod -R 777 /var/www/html/wp-content
+        
+        # Verify WordPress is still functional after restore
+        if docker exec wordpress wp core is-installed --allow-root 2>/dev/null; then
+            echo "✅ WordPress verification after restore: OK"
+        else
+            echo "⚠️  WordPress verification after restore: Failed"
+        fi
     else
         echo "❌ Failed to restore WordPress backup"
+        echo "🔍 Debugging information:"
+        echo "   - Backup file: $backup_filename"
+        echo "   - File size: $(docker exec wordpress ls -lh /var/www/html/wp-content/ai1wm-backups/$backup_filename 2>/dev/null || echo 'File not found')"
+        echo "   - AI1WM plugin status: $(docker exec wordpress wp plugin list --status=active --allow-root | grep ai1wm || echo 'Not found')"
+        echo "   - WordPress status: $(docker exec wordpress wp core is-installed --allow-root 2>/dev/null && echo 'Installed' || echo 'Not installed')"
         exit 1
     fi
 else
@@ -385,7 +409,26 @@ else
                 
                 # Restore backup using WP-CLI
                 echo -e "\n🔄 Restoring WordPress backup..."
-                if echo "y" | docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
+                
+                # Check if AI1WM plugin is active
+                if ! docker exec wordpress wp plugin is-active all-in-one-wp-migration --allow-root 2>/dev/null; then
+                    echo "❌ AI1WM plugin is not active. Activating..."
+                    docker exec wordpress wp plugin activate all-in-one-wp-migration --allow-root
+                fi
+                
+                # Check if AI1WM Unlimited Extension is active
+                if ! docker exec wordpress wp plugin is-active all-in-one-wp-migration-unlimited-extension --allow-root 2>/dev/null; then
+                    echo "❌ AI1WM Unlimited Extension is not active. Activating..."
+                    docker exec wordpress wp plugin activate all-in-one-wp-migration-unlimited-extension --allow-root
+                fi
+                
+                # List backup files for debugging
+                echo "📋 Available backup files:"
+                docker exec wordpress ls -la /var/www/html/wp-content/ai1wm-backups/
+                
+                # Try restore with better error handling
+                echo "🔄 Attempting restore..."
+                if echo "y" | docker exec -i wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
                     echo "✅ WordPress backup restored successfully!"
                     
                     # Wait for restore to complete
@@ -405,6 +448,11 @@ else
                     fi
                 else
                     echo "❌ Failed to restore WordPress backup"
+                    echo "🔍 Debugging information:"
+                    echo "   - Backup file: $backup_filename"
+                    echo "   - File size: $(docker exec wordpress ls -lh /var/www/html/wp-content/ai1wm-backups/$backup_filename 2>/dev/null || echo 'File not found')"
+                    echo "   - AI1WM plugin status: $(docker exec wordpress wp plugin list --status=active --allow-root | grep ai1wm || echo 'Not found')"
+                    echo "   - WordPress status: $(docker exec wordpress wp core is-installed --allow-root 2>/dev/null && echo 'Installed' || echo 'Not installed')"
                     exit 1
                 fi
             else

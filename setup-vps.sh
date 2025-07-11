@@ -2,7 +2,16 @@
 
 # Load environment variables if .env exists
 if [ -f ".env" ]; then
-    export $(cat .env | grep -v '^#' | xargs)
+    # Load environment variables safely, only export valid variable assignments
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        if [[ ! "$line" =~ ^[[:space:]]*# ]] && [[ -n "$line" ]]; then
+            # Check if line contains valid variable assignment (key=value)
+            if [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+                export "$line"
+            fi
+        fi
+    done < .env
 fi
 
 # Default values if not set in .env
@@ -62,7 +71,16 @@ if [ ! -f ".env" ]; then
 fi
 
 # Load environment variables from .env
-export $(cat .env | grep -v '^#' | xargs)
+# Load environment variables safely, only export valid variable assignments
+while IFS= read -r line; do
+    # Skip comments and empty lines
+    if [[ ! "$line" =~ ^[[:space:]]*# ]] && [[ -n "$line" ]]; then
+        # Check if line contains valid variable assignment (key=value)
+        if [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+            export "$line"
+        fi
+    fi
+done < .env
 
 # Clone NextJS repo nếu có cấu hình và chưa tồn tại thư mục nextjs-app
 if [ ! -d "nextjs-app" ] && [ ! -z "$NEXTJS_REPO" ]; then

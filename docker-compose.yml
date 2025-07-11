@@ -31,6 +31,9 @@ services:
             WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
             WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
             WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+            WORDPRESS_CONFIG_EXTRA: |
+                define('WP_HOME','http://${CMS_DOMAIN}');
+                define('WP_SITEURL','http://${CMS_DOMAIN}');
         depends_on:
             - db
         restart: always

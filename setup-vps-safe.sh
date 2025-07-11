@@ -108,11 +108,18 @@ install_dependencies() {
 setup_repository() {
     echo "📥 Setting up repository..."
     
-    # Remove existing directory if exists
-    if [ -d "$PROJECT_DIR" ]; then
+    # Check if directory exists and ask user
+if [ -d "$PROJECT_DIR" ]; then
+    echo "⚠️  Project directory already exists: $PROJECT_DIR"
+    echo "Do you want to remove it and start fresh? (y/N)"
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
         echo "Removing existing project directory..."
         rm -rf "$PROJECT_DIR"
+    else
+        echo "Keeping existing directory. Setup will continue with existing files."
     fi
+fi
     
     # Clone repository
     cd /home

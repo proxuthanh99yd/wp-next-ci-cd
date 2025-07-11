@@ -99,11 +99,11 @@ while true; do
 done
 
 # Import and run setup modules
-echo "📦 Setting up environment..."
-source "$SCRIPT_DIR/setup-env.sh"
-
 echo "🐳 Setting up Docker and Certbot..."
 source "$SCRIPT_DIR/setup-docker.sh"
+
+echo "📦 Setting up environment..."
+source "$SCRIPT_DIR/setup-env.sh"
 
 echo "🔧 Setting up system dependencies..."
 source "$SCRIPT_DIR/setup-system.sh"

@@ -22,7 +22,7 @@ cp env.example .env
 
 ```bash
 # Safe setup (recommended)
-lschmod +x setup-vps-safe.sh
+chmod +x setup-vps-safe.sh
 ./setup-vps-safe.sh
 
 # Or original setup

@@ -143,6 +143,12 @@ fi
 echo -e "\n🚀 Starting WordPress and database..."
 docker-compose up -d db wordpress
 
+# Fix WordPress permissions
+echo -e "\n🔧 Fixing WordPress permissions..."
+docker exec wordpress chown -R www-data:www-data /var/www/html
+docker exec wordpress chmod -R 755 /var/www/html
+docker exec wordpress chmod -R 777 /var/www/html/wp-content
+
 # Wait for database to be ready
 echo -e "\n⏳ Waiting for database to be ready..."
 sleep 20
@@ -287,6 +293,10 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ] && [ "$WORDPRESS_BACKUP_URL" != "https://exa
     # Create ai1wm-backups directory if it doesn't exist
     docker exec wordpress mkdir -p /var/www/html/wp-content/ai1wm-backups
     
+    # Fix permissions for backup directory
+    docker exec wordpress chown -R www-data:www-data /var/www/html/wp-content/ai1wm-backups
+    docker exec wordpress chmod -R 777 /var/www/html/wp-content/ai1wm-backups
+    
     # Get filename from URL (extract the last part of the path)
     backup_filename=$(basename "$WORDPRESS_BACKUP_URL")
     echo "📁 Backup filename: $backup_filename"
@@ -318,18 +328,24 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ] && [ "$WORDPRESS_BACKUP_URL" != "https://exa
     
     # Restore backup using WP-CLI
     echo -e "\n🔄 Restoring WordPress backup..."
-    if echo "y" | docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
-        echo "✅ WordPress backup restored successfully!"
-        
-        # Wait for restore to complete
-        sleep 10
-        
-        # Verify WordPress is still functional after restore
-        if docker exec wordpress wp core is-installed --allow-root 2>/dev/null; then
-            echo "✅ WordPress verification after restore: OK"
-        else
-            echo "⚠️  WordPress verification after restore: Failed"
-        fi
+                    if echo "y" | docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/$backup_filename" --allow-root; then
+                    echo "✅ WordPress backup restored successfully!"
+                    
+                    # Wait for restore to complete
+                    sleep 10
+                    
+                    # Fix permissions after restore
+                    echo "🔧 Fixing permissions after restore..."
+                    docker exec wordpress chown -R www-data:www-data /var/www/html
+                    docker exec wordpress chmod -R 755 /var/www/html
+                    docker exec wordpress chmod -R 777 /var/www/html/wp-content
+                    
+                    # Verify WordPress is still functional after restore
+                    if docker exec wordpress wp core is-installed --allow-root 2>/dev/null; then
+                        echo "✅ WordPress verification after restore: OK"
+                    else
+                        echo "⚠️  WordPress verification after restore: Failed"
+                    fi
     else
         echo "❌ Failed to restore WordPress backup"
         exit 1
@@ -346,6 +362,10 @@ else
         
         # Create ai1wm-backups directory if it doesn't exist
         docker exec wordpress mkdir -p /var/www/html/wp-content/ai1wm-backups
+        
+        # Fix permissions for backup directory
+        docker exec wordpress chown -R www-data:www-data /var/www/html/wp-content/ai1wm-backups
+        docker exec wordpress chmod -R 777 /var/www/html/wp-content/ai1wm-backups
         
         # Get filename from path
         backup_filename=$(basename "$local_backup")
@@ -370,6 +390,12 @@ else
                     
                     # Wait for restore to complete
                     sleep 10
+                    
+                    # Fix permissions after restore
+                    echo "🔧 Fixing permissions after restore..."
+                    docker exec wordpress chown -R www-data:www-data /var/www/html
+                    docker exec wordpress chmod -R 755 /var/www/html
+                    docker exec wordpress chmod -R 777 /var/www/html/wp-content
                     
                     # Verify WordPress is still functional after restore
                     if docker exec wordpress wp core is-installed --allow-root 2>/dev/null; then
@@ -407,7 +433,8 @@ echo -e "\n✅ WordPress is fully ready with plugins installed!"
 
 # Start nginx first (will serve static content and proxy to NextJS later)
 echo -e "\n🚀 Starting nginx..."
-docker-compose up -d nginx
+# Start nginx without building other services
+docker-compose up -d --no-deps nginx
 
 # Now build and start NextJS
 echo -e "\n🚀 Building and starting NextJS..."
@@ -417,6 +444,29 @@ docker-compose up -d nextjs
 # Wait for NextJS to be ready
 echo -e "\n⏳ Waiting for NextJS to be ready..."
 sleep 20
+
+# Enable NextJS nginx config after NextJS is ready
+echo -e "\n🔄 Enabling NextJS nginx configuration..."
+# Uncomment NextJS HTTP server block
+sed -i 's/# server {/server {/g' nginx/default.conf
+sed -i 's/#     listen 80;/    listen 80;/g' nginx/default.conf
+sed -i 's/#     server_name sanpham.ziohair.vn booking.ziohair.vn localhost;/    server_name sanpham.ziohair.vn booking.ziohair.vn localhost;/g' nginx/default.conf
+sed -i 's/#     # Security headers/    # Security headers/g' nginx/default.conf
+sed -i 's/#     add_header/    add_header/g' nginx/default.conf
+sed -i 's/#     location \/ {/    location \/ {/g' nginx/default.conf
+sed -i 's/#         proxy_pass/        proxy_pass/g' nginx/default.conf
+sed -i 's/#         proxy_http_version/        proxy_http_version/g' nginx/default.conf
+sed -i 's/#         proxy_set_header/        proxy_set_header/g' nginx/default.conf
+sed -i 's/#         proxy_cache_bypass/        proxy_cache_bypass/g' nginx/default.conf
+sed -i 's/#         # Timeout settings/        # Timeout settings/g' nginx/default.conf
+sed -i 's/#         proxy_connect_timeout/        proxy_connect_timeout/g' nginx/default.conf
+sed -i 's/#         proxy_send_timeout/        proxy_send_timeout/g' nginx/default.conf
+sed -i 's/#         proxy_read_timeout/        proxy_read_timeout/g' nginx/default.conf
+sed -i 's/#     }/    }/g' nginx/default.conf
+sed -i 's/# }/}/g' nginx/default.conf
+
+# Reload nginx configuration
+docker exec nginx nginx -s reload
 
 # Final verification
 echo -e "\n🔍 Final verification..."

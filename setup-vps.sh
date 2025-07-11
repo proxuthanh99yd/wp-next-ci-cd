@@ -75,7 +75,19 @@ set +a  # turn off automatic export
 # Clone NextJS repo nếu có cấu hình và chưa tồn tại thư mục nextjs-app
 if [ ! -d "nextjs-app" ] && [ ! -z "$NEXTJS_REPO" ]; then
     echo "🚀 Cloning NextJS repo: $NEXTJS_REPO"
-    git clone "$NEXTJS_REPO" nextjs-app
+    if git clone "$NEXTJS_REPO" nextjs-app; then
+        echo "✅ NextJS repo cloned successfully"
+    else
+        echo "❌ Failed to clone NextJS repo: $NEXTJS_REPO"
+        echo "   Please check the repository URL and your git access"
+        exit 1
+    fi
+elif [ -d "nextjs-app" ] && [ -z "$NEXTJS_REPO" ]; then
+    echo "⚠️  nextjs-app directory exists but NEXTJS_REPO not configured in .env"
+    echo "   Please set NEXTJS_REPO in .env file or remove nextjs-app directory"
+elif [ -d "nextjs-app" ] && [ ! -z "$NEXTJS_REPO" ]; then
+    echo "ℹ️  nextjs-app directory already exists, skipping clone"
+    echo "   To force re-clone, remove the nextjs-app directory first"
 fi
 
 # Set fallback values if still empty

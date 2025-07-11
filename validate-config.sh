@@ -2,7 +2,9 @@
 
 # Load environment variables
 if [ -f ".env" ]; then
-    export $(cat .env | grep -v '^#' | xargs)
+    set -a  # automatically export all variables
+    source .env 2>/dev/null || true
+    set +a  # turn off automatic export
 fi
 
 echo "🔍 Validating configuration..."
@@ -37,13 +39,13 @@ if [ ${#missing_vars[@]} -ne 0 ]; then
     exit 1
 fi
 
-# Validate domain format
-if [[ ! "$PRIMARY_DOMAIN" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
+# Validate domain format (supports subdomains)
+if [[ ! "$PRIMARY_DOMAIN" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
     echo "❌ Invalid PRIMARY_DOMAIN format: $PRIMARY_DOMAIN"
     exit 1
 fi
 
-if [[ ! "$CMS_DOMAIN" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
+if [[ ! "$CMS_DOMAIN" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
     echo "❌ Invalid CMS_DOMAIN format: $CMS_DOMAIN"
     exit 1
 fi

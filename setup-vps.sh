@@ -10,7 +10,7 @@ fi
 
 # Default values if not set in .env
 REPO_URL="${REPO_URL:-git@github.com:yourname/yourrepo.git}"
-PROJECT_DIR="${PROJECT_DIR:-/home/${SSH_USER:-ubuntu}/${PROJECT_NAME:-your-project}}"
+PROJECT_DIR="${PROJECT_DIR:-/home/${PROJECT_NAME:-wp-next-ci-cd}}"
 DOMAIN_NEXT="${NEXTJS_DOMAINS:-domain1.com domain2.com domain3.com}"
 CMS_DOMAIN="${CMS_DOMAIN:-cms.domain1.com}"
 EMAIL="${SSL_EMAIL:-your@email.com}"
@@ -20,8 +20,10 @@ sudo apt update
 sudo apt install -y docker.io docker-compose git
 
 # Clone repository
-cd /home/ubuntu
-git clone $REPO_URL $PROJECT_DIR
+cd /home
+if [ ! -d "$PROJECT_DIR" ]; then
+    git clone $REPO_URL $PROJECT_DIR
+fi
 
 # Create .env file for WordPress if not exists
 cd $PROJECT_DIR

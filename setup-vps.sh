@@ -154,6 +154,18 @@ while [ $attempt -le $max_attempts ]; do
     fi
     
     echo -e "\n⏳ Attempt $attempt/$max_attempts: WordPress not ready yet..."
+    
+    # Try to install WordPress if not installed
+    if [ $attempt -eq 5 ]; then
+        echo -e "\n🔧 Attempting to install WordPress..."
+        if docker exec wordpress wp core install --url=http://localhost --title="My WordPress Site" --admin_user=admin --admin_password=admin123 --admin_email=admin@localhost.com --allow-root 2>/dev/null; then
+            echo -e "\n✅ WordPress installed successfully!"
+            break
+        else
+            echo -e "\n⚠️  WordPress installation failed, continuing to wait..."
+        fi
+    fi
+    
     sleep 10
     ((attempt++))
     

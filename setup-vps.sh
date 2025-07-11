@@ -64,6 +64,12 @@ fi
 # Load environment variables from .env
 export $(cat .env | grep -v '^#' | xargs)
 
+# Clone NextJS repo nếu có cấu hình và chưa tồn tại thư mục nextjs-app
+if [ ! -d "nextjs-app" ] && [ ! -z "$NEXTJS_REPO" ]; then
+    echo "🚀 Cloning NextJS repo: $NEXTJS_REPO"
+    git clone "$NEXTJS_REPO" nextjs-app
+fi
+
 # Set fallback values if still empty
 PRIMARY_DOMAIN="${PRIMARY_DOMAIN:-example.com}"
 CMS_DOMAIN="${CMS_DOMAIN:-cms.example.com}"

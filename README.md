@@ -22,8 +22,8 @@ cp env.example .env
 
 ```bash
 # Safe setup (recommended)
-chmod +x setup-vps-safe.sh
-./setup-vps-safe.sh
+chmod +x setup-vps.sh
+./setup-vps.sh
 
 # Or original setup
 chmod +x setup-vps.sh
@@ -48,7 +48,7 @@ your-project/
 │   └── Dockerfile             # Next.js container
 ├── wp/                        # WordPress files
 ├── setup-vps.sh              # VPS setup script
-├── setup-vps-safe.sh         # Safe VPS setup with recovery
+├── setup-vps.sh              # Main VPS setup script
 ├── recover-setup.sh          # Recovery tool for failed setups
 ├── validate-config.sh        # Configuration validation
 ├── generate-nginx-config.sh   # Dynamic nginx config

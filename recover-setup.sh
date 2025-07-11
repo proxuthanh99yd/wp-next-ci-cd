@@ -169,7 +169,7 @@ clean_start() {
         echo "Removing lock file..."
         rm -f /tmp/setup-vps.lock
         
-        echo "✅ Clean start ready. Run setup-vps-safe.sh again."
+        echo "✅ Clean start ready. Run setup-vps.sh again."
     else
         echo "Clean start cancelled."
     fi

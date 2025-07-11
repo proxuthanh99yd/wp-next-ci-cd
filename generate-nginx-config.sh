@@ -12,8 +12,11 @@ NEXTJS_DOMAINS="${NEXTJS_DOMAINS:-domain1.com domain2.com domain3.com}"
 PRIMARY_DOMAIN="${PRIMARY_DOMAIN:-domain1.com}"
 CMS_DOMAIN="${CMS_DOMAIN:-cms.domain1.com}"
 
-# Generate nginx config
+# Generate main nginx config
 cat > nginx/default.conf << EOF
+# Main Nginx Configuration
+# This file imports specific configurations for WordPress and NextJS
+
 # Security headers
 add_header X-Frame-Options "SAMEORIGIN" always;
 add_header X-XSS-Protection "1; mode=block" always;
@@ -27,6 +30,18 @@ gzip_vary on;
 gzip_min_length 1024;
 gzip_proxied expired no-cache no-store private must-revalidate auth;
 gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss;
+
+# Import WordPress configuration (enabled by default)
+include /etc/nginx/wordpress.conf;
+
+# Import NextJS configuration (commented out by default, will be enabled later)
+# include /etc/nginx/nextjs.conf;
+EOF
+
+# Generate WordPress configuration
+cat > nginx/wordpress.conf << EOF
+# WordPress Nginx Configuration
+# This file contains nginx configuration for WordPress
 
 # CMS HTTPS access
 server {
@@ -53,6 +68,7 @@ server {
     location / {
         try_files \$uri \$uri/ /index.php?\$args;
     }
+    
     location ~ \.php\$ {
         include fastcgi_params;
         fastcgi_pass wordpress:9000;
@@ -65,7 +81,7 @@ server {
     location ~ /\. {
         deny all;
     }
-    location ~ ~$ {
+    location ~ ~\$ {
         deny all;
     }
 }
@@ -76,6 +92,12 @@ server {
     server_name ${CMS_DOMAIN};
     return 301 https://\$host\$request_uri;
 }
+EOF
+
+# Generate NextJS configuration
+cat > nginx/nextjs.conf << EOF
+# NextJS Nginx Configuration
+# This file contains nginx configuration for NextJS
 
 # Next.js domains with SSL
 server {
@@ -123,7 +145,12 @@ server {
 }
 EOF
 
-echo "✅ Nginx config generated successfully!"
+echo "✅ Nginx config files generated successfully!"
 echo "Next.js Domains: ${NEXTJS_DOMAINS}"
 echo "CMS Domain: ${CMS_DOMAIN}"
-echo "Primary domain for SSL: ${PRIMARY_DOMAIN}" 
+echo "Primary domain for SSL: ${PRIMARY_DOMAIN}"
+echo ""
+echo "Generated files:"
+echo "  - nginx/default.conf (main config with imports)"
+echo "  - nginx/wordpress.conf (WordPress specific config)"
+echo "  - nginx/nextjs.conf (NextJS specific config)" 

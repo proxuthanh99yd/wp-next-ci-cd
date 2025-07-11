@@ -11,6 +11,10 @@ services:
             - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
             - ./wp:/var/www/html
             - /etc/letsencrypt:/etc/letsencrypt:ro
+        environment:
+            - CMS_DOMAIN=${CMS_DOMAIN:-cms.ziohair.vn}
+            - NEXTJS_DOMAIN=${NEXTJS_DOMAIN:-sanpham.ziohair.vn booking.ziohair.vn}
+            - PRIMARY_DOMAIN=${PRIMARY_DOMAIN:-ziohair.vn}
         depends_on:
             - wordpress
             - nextjs
@@ -102,13 +106,7 @@ services:
             - NEXT_PUBLIC_API_CF7=${NEXT_PUBLIC_API_CF7:-/wp-json/contact-form-7/v1}
         restart: always
         healthcheck:
-            test:
-                [
-                    "CMD",
-                    "curl",
-                    "-f",
-                    "http://localhost:3000/api/health || exit 1",
-                ]
+            test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
             interval: 30s
             timeout: 10s
             retries: 3

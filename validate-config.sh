@@ -93,7 +93,6 @@ fi
 required_files=(
     "docker-compose.yml"
     "generate-nginx-config.sh"
-    "nextjs-app/Dockerfile"
 )
 
 for file in "${required_files[@]}"; do
@@ -102,6 +101,13 @@ for file in "${required_files[@]}"; do
         exit 1
     fi
 done
+
+# Check NextJS files only if NEXTJS_REPO is configured
+if [ ! -z "$NEXTJS_REPO" ] && [ ! -f "nextjs-app/Dockerfile" ]; then
+    echo "❌ NextJS Dockerfile not found: nextjs-app/Dockerfile"
+    echo "   Please ensure NextJS repository is properly cloned"
+    exit 1
+fi
 
 echo "✅ Configuration validation passed!"
 echo "📋 Summary:"

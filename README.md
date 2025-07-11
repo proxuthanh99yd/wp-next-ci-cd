@@ -196,8 +196,8 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ]; then
     # Tạo thư mục ai1wm-backups
     docker exec wordpress mkdir -p /var/www/html/wp-content/ai1wm-backups
 
-    # Tải backup bằng wget
-    docker exec wordpress wget -O "/var/www/html/wp-content/ai1wm-backups/backup.wpress" "$WORDPRESS_BACKUP_URL"
+    # Tải backup bằng curl
+docker exec wordpress curl -L -o "/var/www/html/wp-content/ai1wm-backups/backup.wpress" "$WORDPRESS_BACKUP_URL"
 
     # Restore backup
     docker exec wordpress wp ai1wm restore "/var/www/html/wp-content/ai1wm-backups/backup.wpress" --allow-root

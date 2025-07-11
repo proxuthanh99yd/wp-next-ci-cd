@@ -252,8 +252,8 @@ if [ ! -z "$WORDPRESS_BACKUP_URL" ] && [ "$WORDPRESS_BACKUP_URL" != "https://exa
     # Get filename from URL
     backup_filename=$(basename "$WORDPRESS_BACKUP_URL")
     
-    # Download backup file to WordPress container
-    if docker exec wordpress wget -O "/var/www/html/wp-content/ai1wm-backups/$backup_filename" "$WORDPRESS_BACKUP_URL"; then
+    # Download backup file to WordPress container (using curl which is usually available)
+    if docker exec wordpress curl -L -o "/var/www/html/wp-content/ai1wm-backups/$backup_filename" "$WORDPRESS_BACKUP_URL"; then
         echo "✅ Backup downloaded successfully: $backup_filename"
         
         # Wait a moment for file to be fully written

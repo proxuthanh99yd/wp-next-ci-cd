@@ -115,7 +115,7 @@ WORDPRESS_BACKUP_URL=https://your-domain.com/backup.wpress
 
 ```bash
 # Script tự động thực hiện:
-wget -O /var/www/html/wp-content/ai1wm-backups/backup.wpress $WORDPRESS_BACKUP_URL
+curl -L -o /var/www/html/wp-content/ai1wm-backups/backup.wpress $WORDPRESS_BACKUP_URL
 wp ai1wm restore /var/www/html/wp-content/ai1wm-backups/backup.wpress --allow-root
 ```
 

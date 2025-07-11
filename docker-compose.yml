@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+    nginx:
+        image: nginx:latest
+        container_name: nginx
+        ports:
+            - "80:80" # HTTP for CMS and redirects
+            - "443:443" # HTTPS for Next.js
+        volumes:
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./wp:/var/www/html
+            - /etc/letsencrypt:/etc/letsencrypt:ro
+        depends_on:
+            - wordpress
+            - nextjs
+        restart: always
+        healthcheck:
+            test: ["CMD", "nginx", "-t"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    wordpress:
+        image: wordpress:php8.1-fpm
+        container_name: wordpress
+        volumes:
+            - ./wp:/var/www/html
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+            WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+            WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+        depends_on:
+            - db
+        restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "php-fpm -t || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    db:
+        image: mysql:5.7
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - db_data:/var/lib/mysql
+        restart: always
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    nextjs:
+        container_name: nextjs
+        build:
+            context: ./nextjs-app
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        environment:
+            - NODE_ENV=production
+        restart: always
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "curl",
+                    "-f",
+                    "http://localhost:3000/api/health || exit 1",
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+volumes:
+    db_data:

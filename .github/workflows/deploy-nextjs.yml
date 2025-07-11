@@ -1,0 +1,50 @@
+name: Deploy Next.js to VPS
+on:
+    push:
+        branches:
+            - main
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout
+              uses: actions/checkout@v3
+            - name: 🔐 Add SSH
+              uses: webfactory/ssh-agent@v0.7.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+            - name: 🚀 Deploy to VPS
+              run: |
+                  ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                    cd /home/${{ secrets.SSH_USER }}/${{ secrets.PROJECT_NAME }}
+                    
+                    # Backup current state
+                    docker-compose ps > backup_state.txt
+                    
+                    # Pull latest code
+                    git pull origin main
+                    
+                    # Generate nginx config
+                    ./generate-nginx-config.sh
+                    
+                    # Stop and rebuild Next.js container
+                    docker-compose stop nextjs
+                    docker-compose build --no-cache nextjs
+                    
+                    # Start Next.js container
+                    docker-compose up -d nextjs
+                    
+                    # Wait for health check
+                    sleep 30
+                    
+                    # Check if deployment was successful
+                    if docker-compose ps nextjs | grep -q "Up"; then
+                        echo "✅ Deployment successful!"
+                        rm backup_state.txt
+                    else
+                        echo "❌ Deployment failed! Rolling back..."
+                        docker-compose stop nextjs
+                        docker-compose up -d nextjs
+                        exit 1
+                    fi
+                  EOF

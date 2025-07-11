@@ -2,7 +2,9 @@
 
 # Load environment variables
 if [ -f ".env" ]; then
-    export $(cat .env | grep -v '^#' | xargs)
+    set -a  # automatically export all variables
+    source .env 2>/dev/null || true
+    set +a  # turn off automatic export
 fi
 
 # Default values

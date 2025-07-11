@@ -2,12 +2,23 @@
 
 # Load environment variables
 if [ -f ".env" ]; then
+    echo "📁 Loading .env file..."
     set -a  # automatically export all variables
     source .env 2>/dev/null || true
     set +a  # turn off automatic export
+    echo "✅ .env file loaded"
+else
+    echo "❌ .env file not found!"
+    exit 1
 fi
 
 echo "🔍 Validating configuration..."
+
+# Debug: Show loaded variables
+echo "📋 Debug - Loaded variables:"
+echo "   NEXTJS_DOMAINS: '$NEXTJS_DOMAINS'"
+echo "   PRIMARY_DOMAIN: '$PRIMARY_DOMAIN'"
+echo "   CMS_DOMAIN: '$CMS_DOMAIN'"
 
 # Check required environment variables
 required_vars=(

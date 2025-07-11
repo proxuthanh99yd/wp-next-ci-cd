@@ -137,14 +137,10 @@ sleep 20
 
 # Install WP-CLI first
 echo -e "\n📦 Installing WP-CLI..."
-if ! docker exec wordpress wp --version --allow-root 2>/dev/null; then
-    docker exec wordpress curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    docker exec wordpress chmod +x wp-cli.phar
-    docker exec wordpress mv wp-cli.phar /usr/local/bin/wp
-    echo "✅ WP-CLI installed successfully"
-else
-    echo "✅ WP-CLI already installed"
-fi
+docker exec wordpress curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+docker exec wordpress chmod +x wp-cli.phar
+docker exec wordpress mv wp-cli.phar /usr/local/bin/wp
+echo "✅ WP-CLI installed successfully"
 
 # Wait for WordPress to be fully ready
 echo -e "\n⏳ Waiting for WordPress to be ready..."

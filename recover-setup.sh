@@ -5,7 +5,7 @@ if [ -f ".env" ]; then
     export $(cat .env | grep -v '^#' | xargs)
 fi
 
-PROJECT_DIR="${PROJECT_DIR:-/home/${SSH_USER:-ubuntu}/${PROJECT_NAME:-your-project}}"
+PROJECT_DIR="${PROJECT_DIR:-/home/${PROJECT_NAME:-wp-next-ci-cd}}"
 
 echo "🔧 Setup Recovery Tool"
 echo "======================"
@@ -126,7 +126,7 @@ fix_ssl() {
 # Function to restore from backup
 restore_backup() {
     echo "📦 Available backups:"
-    ls -la /home/ubuntu/backup-* 2>/dev/null || echo "No backups found"
+    ls -la /home/backup-* 2>/dev/null || echo "No backups found"
     
     echo ""
     echo "Enter backup directory to restore from (or press Enter to skip):"

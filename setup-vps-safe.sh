@@ -7,7 +7,7 @@ fi
 
 # Default values if not set in .env
 REPO_URL="${REPO_URL:-git@github.com:yourname/yourrepo.git}"
-PROJECT_DIR="${PROJECT_DIR:-/home/${SSH_USER:-ubuntu}/${PROJECT_NAME:-your-project}}"
+PROJECT_DIR="${PROJECT_DIR:-/home/${PROJECT_NAME:-wp-next-ci-cd}}"
 DOMAIN_NEXT="${NEXTJS_DOMAINS:-domain1.com domain2.com domain3.com}"
 CMS_DOMAIN="${CMS_DOMAIN:-cms.domain1.com}"
 EMAIL="${SSL_EMAIL:-your@email.com}"
@@ -39,7 +39,7 @@ cleanup_lock() {
 backup_existing() {
     if [ -d "$PROJECT_DIR" ]; then
         echo "📦 Backup existing setup..."
-        BACKUP_DIR="/home/ubuntu/backup-$(date +%Y%m%d-%H%M%S)"
+        BACKUP_DIR="/home/backup-$(date +%Y%m%d-%H%M%S)"
         mkdir -p "$BACKUP_DIR"
         
         # Backup .env if exists
@@ -115,7 +115,7 @@ setup_repository() {
     fi
     
     # Clone repository
-    cd /home/ubuntu
+    cd /home
     if ! git clone "$REPO_URL" "$PROJECT_DIR"; then
         echo "❌ Failed to clone repository!"
         exit 1
@@ -248,7 +248,7 @@ show_status() {
     echo "   Next.js: https://$PRIMARY_DOMAIN"
     echo ""
     echo "📁 Project directory: $PROJECT_DIR"
-    echo "📦 Backup directory: /home/ubuntu/backup-*"
+    echo "📦 Backup directory: /home/backup-*"
 }
 
 # Main execution

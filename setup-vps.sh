@@ -135,6 +135,17 @@ docker-compose up -d db wordpress
 echo -e "\n⏳ Waiting for database to be ready..."
 sleep 20
 
+# Install WP-CLI first
+echo -e "\n📦 Installing WP-CLI..."
+if ! docker exec wordpress wp --version --allow-root 2>/dev/null; then
+    docker exec wordpress curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    docker exec wordpress chmod +x wp-cli.phar
+    docker exec wordpress mv wp-cli.phar /usr/local/bin/wp
+    echo "✅ WP-CLI installed successfully"
+else
+    echo "✅ WP-CLI already installed"
+fi
+
 # Wait for WordPress to be fully ready
 echo -e "\n⏳ Waiting for WordPress to be ready..."
 max_attempts=30
@@ -156,17 +167,6 @@ while [ $attempt -le $max_attempts ]; do
         exit 1
     fi
 done
-
-# Install WP-CLI if not available
-echo -e "\n📦 Installing WP-CLI..."
-if ! docker exec wordpress wp --version --allow-root 2>/dev/null; then
-    docker exec wordpress curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    docker exec wordpress chmod +x wp-cli.phar
-    docker exec wordpress mv wp-cli.phar /usr/local/bin/wp
-    echo "✅ WP-CLI installed successfully"
-else
-    echo "✅ WP-CLI already installed"
-fi
 
 # Install WordPress plugins in specific order
 echo -e "\n🔧 Installing WordPress plugins..."
